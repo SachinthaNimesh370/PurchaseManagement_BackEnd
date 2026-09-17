@@ -7,7 +7,6 @@ namespace PurchaseManagement.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Route("api/locations")]
 [Route("api/location")]
 public class LocationsController : ControllerBase
 {
