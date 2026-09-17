@@ -50,7 +50,9 @@ public class AuthService : IAuthService
         try
         {
             _logger.LogInformation("Calling external Enhanzer login API for user {Email}", request.Email);
-            httpResponse = await _httpClient.PostAsJsonAsync(endpoint, payload);
+            var serializedPayload = JsonSerializer.Serialize(payload);
+            var httpContent = new StringContent(serializedPayload, System.Text.Encoding.UTF8, "application/json");
+            httpResponse = await _httpClient.PostAsync(endpoint, httpContent);
         }
         catch (Exception ex)
         {
@@ -143,6 +145,15 @@ public class AuthService : IAuthService
                 }
                 else if (responseBody.ValueKind == JsonValueKind.Object)
                 {
+                    if (responseBody.TryGetProperty("Doc_Msg", out var docMsgProp))
+                    {
+                        var docMsg = docMsgProp.GetString();
+                        if (!string.IsNullOrWhiteSpace(docMsg) && docMsg.Contains("invalid", StringComparison.OrdinalIgnoreCase))
+                        {
+                            isLoginSuccessful = false;
+                        }
+                    }
+
                     if (responseBody.TryGetProperty("User_Locations", out var locs))
                     {
                         ExtractLocationsFromArray(locs);
@@ -156,9 +167,14 @@ public class AuthService : IAuthService
                 ExtractLocationsFromArray(rootLocs);
             }
 
+            // Login requires successful location retrieval
             if (userLocations.Any())
             {
                 isLoginSuccessful = true;
+            }
+            else
+            {
+                isLoginSuccessful = false;
             }
 
             // Check for explicit error message from external API
