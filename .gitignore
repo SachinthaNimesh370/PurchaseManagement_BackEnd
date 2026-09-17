@@ -1,0 +1,25 @@
+# Environment & Secret files
+.env
+.env*.local
+*.env
+!.env.example
+
+# Build and Output directories
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+
+# Visual Studio / VS Code / Rider cache
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
