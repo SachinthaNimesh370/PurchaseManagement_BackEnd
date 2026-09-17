@@ -21,3 +21,22 @@ BEGIN
     );
 END
 GO
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'Purchase_Bills')
+BEGIN
+    CREATE TABLE Purchase_Bills
+    (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        Item NVARCHAR(100) NOT NULL,
+        Batch NVARCHAR(200) NOT NULL,
+        Standard_Cost DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        Standard_Price DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        Quantity INT NOT NULL,
+        Discount DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        Total_Cost DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        Total_Selling DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+GO
+

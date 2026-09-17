@@ -85,8 +85,10 @@ builder.Services.AddCors(options =>
 // 4. Register Services & Repositories
 builder.Services.AddHttpClient<IAuthService, AuthService>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<IPurchaseBillRepository, PurchaseBillRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IPurchaseBillService, PurchaseBillService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -137,6 +139,35 @@ using (var scope = app.Services.CreateScope())
     {
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
         dbContext.Database.EnsureCreated();
+        dbContext.Database.ExecuteSqlRaw(@"
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'Location_Details')
+BEGIN
+    CREATE TABLE Location_Details
+    (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        Location_Code NVARCHAR(100) NOT NULL,
+        Location_Name NVARCHAR(200) NOT NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'Purchase_Bills')
+BEGIN
+    CREATE TABLE Purchase_Bills
+    (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        Item NVARCHAR(100) NOT NULL,
+        Batch NVARCHAR(200) NOT NULL,
+        Standard_Cost DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        Standard_Price DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        Quantity INT NOT NULL,
+        Discount DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        Total_Cost DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        Total_Selling DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+");
         logger.LogInformation("Database verified and schema initialized.");
     }
     catch (Exception ex)
